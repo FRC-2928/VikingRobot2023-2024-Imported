@@ -18,15 +18,24 @@ import frc.robot.Constants.*;
 import frc.robot.sim.DrivebaseSimFX;
 import frc.robot.subsystems.Transmission.GearState;
 
-import com.ctre.phoenix.motorcontrol.*;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-import com.ctre.phoenix.sensors.WPI_Pigeon2;
+// import com.ctre.phoenix.motorcontrol.*;
+// import com.ctre.phoenix.motorcontrol.can.TalonFX;
+// import com.ctre.phoenix.sensors.WPI_Pigeon2;
+
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.hardware.*;
+// import com.ctre.phoenix.sensors.PigeonIMU;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public class Drivetrain extends SubsystemBase {
-	public final WPI_TalonFX rightLeader = new WPI_TalonFX(CANBusIDs.DrivetrainRightBackTalon);
-	public final WPI_TalonFX leftLeader = new WPI_TalonFX(CANBusIDs.DrivetrainLeftBackTalon);
-	public final WPI_TalonFX rightFollower = new WPI_TalonFX(CANBusIDs.DrivetrainRightFrontTalon);
-	public final WPI_TalonFX leftFollower = new WPI_TalonFX(CANBusIDs.DrivetrainLeftFrontTalon);
+	public final TalonFX rightLeader = new TalonFX(CANBusIDs.DrivetrainRightBackTalon);
+	public final TalonFX leftLeader = new TalonFX(CANBusIDs.DrivetrainLeftBackTalon);
+	public final TalonFX rightFollower = new TalonFX(CANBusIDs.DrivetrainRightFrontTalon);
+	public final TalonFX leftFollower = new TalonFX(CANBusIDs.DrivetrainLeftFrontTalon);
 
   	private final Limelight limelight = new Limelight("limelight-top");
 	private final Limelight bottomLimelight = new Limelight("limelight-intake");
@@ -36,7 +45,7 @@ public class Drivetrain extends SubsystemBase {
 	// TODO: make this work
 	public boolean brakeOverride = false;
 
-	private WPI_Pigeon2 pigeon = new WPI_Pigeon2(CANBusIDs.Pigeon);
+	private Pigeon2 pigeon = new Pigeon2(CANBusIDs.Pigeon);
 
 	private double offset;
 
@@ -50,7 +59,9 @@ public class Drivetrain extends SubsystemBase {
 	private final Field2d fieldEstimated = new Field2d();
 	private final Field2d fieldLimelight = new Field2d();
 
-	private DrivebaseSimFX driveSim = new DrivebaseSimFX(rightLeader, leftLeader, pigeon);
+	private final  TalonFXConfiguration leftConfiguration = new TalonFXConfiguration();
+	private final  TalonFXConfiguration rightConfiguration = new TalonFXConfiguration();
+	// private DrivebaseSimFX driveSim = new DrivebaseSimFX(rightLeader, leftLeader, pigeon);
 
 	// -----------------------------------------------------------
 	// Initialization
@@ -64,11 +75,11 @@ public class Drivetrain extends SubsystemBase {
 		this.resetEncoders();
 		this.zeroGyro();
 
-		if(DriverStation.getAlliance() == DriverStation.Alliance.Red) {
-			this.pigeon.setYaw(0);
-		} else {
-			this.pigeon.setYaw(180);
-		}
+		// if(DriverStation.getAlliance() == DriverStation.Alliance.Red) {
+		// 	this.pigeon.setYaw(0);
+		// } else {
+		// 	this.pigeon.setYaw(180);
+		// }
 
 		// Start with default Pose2d(0, 0, 0)
 		this.odometry = new DifferentialDriveOdometry(
@@ -96,75 +107,59 @@ public class Drivetrain extends SubsystemBase {
 
 	public void configureMotors() {
 		// Configure the motors
-		for(WPI_TalonFX fx : new WPI_TalonFX[] { this.rightLeader, this.rightFollower, this.leftLeader, this.leftFollower }) {
-			// Reset settings for safety
-			fx.configFactoryDefault();
-
-			// Sets voltage compensation to 10, used for percent output
-			fx.configVoltageCompSaturation(10);
-			fx.enableVoltageCompensation(true);
-
-			// Setting just in case
-			fx.configNominalOutputForward(0);
-			fx.configNominalOutputReverse(0);
-			fx.configPeakOutputForward(1);
-			fx.configPeakOutputReverse(-1);
-
-			fx.configOpenloopRamp(0.4);
-
-			// Setting deadband(area required to start moving the motor) to 1%
-			fx.configNeutralDeadband(0.01);
-
-			// Set to coast mode, will not brake the motor when no power is sent
-			fx.setNeutralMode(NeutralMode.Brake);
-
-			/**
-			 * Setting input side current limit (amps)
-			 * 45 continious, 80 peak, 30 millieseconds allowed at peak
-			 * 40 amp breaker can support above 40 amps for a little bit
-			 * Falcons have insane acceleration so allowing it to reach 80 for 0.03 seconds
-			 * should be fine
-			 */
-			fx.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 40, 55, 20));
-
-			// Either using the integrated Falcon sensor or an external one, will change if
-			// needed
-			fx.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
-
-			// Set PID values
-			fx.config_kP(0, AutoConstants.GainsAuto.P, 0);
-			fx.config_kI(0, AutoConstants.GainsAuto.I, 0);
-			fx.config_kD(0, AutoConstants.GainsAuto.D, 0);
-			fx.config_kF(0, AutoConstants.GainsAuto.F, 0);
+		for(TalonFX fx : new TalonFX[] { this.rightLeader, this.rightFollower, this.leftLeader, this.leftFollower }) {
+		      // Apply default configuration
+        	fx.getConfigurator().apply(new TalonFXConfiguration());     
 		}
 
-		// New Talon FX inverts. Would replace InvertType.InvertMotorOutput
-		// this.leftLeader.setInverted(TalonFXInvertType.CounterClockwise);
-		// this.rightLeader.setInverted(TalonFXInvertType.Clockwise);
-
-		// Setting followers, followers don't automatically follow the Leader's inverts
-		// so you must set the invert type to Follow the Leader
-		this.rightFollower.setInverted(InvertType.FollowMaster);
-		this.leftFollower.setInverted(InvertType.FollowMaster);
-
-		this.rightFollower.follow(this.rightLeader, FollowerType.PercentOutput);
-		this.leftFollower.follow(this.leftLeader, FollowerType.PercentOutput);
-
-		this.leftLeader.setInverted(InvertType.InvertMotorOutput);
+		  /* Configure the devices */
+		//   var leftConfiguration = new TalonFXConfiguration();
+		//   var rightConfiguration = new TalonFXConfiguration();
+		  
+		  leftConfiguration.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = 0.1;  
+		  rightConfiguration.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = 0.1;
+		  
+		  leftConfiguration.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+		  rightConfiguration.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+		  
+		  leftConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+		  rightConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+		  
+		  // Have the wheels on each side of the drivetrain run in opposite directions
+		  leftConfiguration.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+		  rightConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+		  
+		  // Apply the configuration to the wheels
+		  this.leftLeader.getConfigurator().apply(leftConfiguration);
+		  this.leftFollower.getConfigurator().apply(leftConfiguration);
+		  this.rightLeader.getConfigurator().apply(rightConfiguration);
+		  this.rightFollower.getConfigurator().apply(rightConfiguration);
+		  
+		  // Set up followers to follow leaders
+		  this.leftFollower.setControl(new Follower(leftLeader.getDeviceID(), false));
+		  this.rightFollower.setControl(new Follower(rightLeader.getDeviceID(), false));
+		  
+		  // Enable safety
+		  this.leftLeader.setSafetyEnabled(true);
+		  this.rightLeader.setSafetyEnabled(true);
 	}
 
 	// -----------------------------------------------------------
 	// Control Input
 	// -----------------------------------------------------------
 	public void halt() {
-		this.tankDriveVolts(0, 0);
+		// this.tankDriveVolts(0, 0);
+		this.diffDrive.arcadeDrive(0, 0);
+
 	}
 
 	public void tankDriveVolts(double leftVolts, double rightVolts) {
-		this.rightLeader.set(ControlMode.PercentOutput, leftVolts / 12);
-		this.leftLeader.set(ControlMode.PercentOutput, rightVolts / 12);
-
-		// Feed motor safety to assert that we're in control
+		var leftVoltsRequest = new DutyCycleOut(leftVolts / 12);
+		this.leftLeader.setControl(leftVoltsRequest);
+	
+		var rightVoltsRequest = new DutyCycleOut(rightVolts / 12);
+		this.rightLeader.setControl(rightVoltsRequest);
+	
 		this.diffDrive.feed();
 	}
 
@@ -174,8 +169,8 @@ public class Drivetrain extends SubsystemBase {
 	}
 
 	public void resetEncoders() {
-		this.rightLeader.setSelectedSensorPosition(0);
-		this.leftLeader.setSelectedSensorPosition(0);
+		// this.rightLeader.setSelectedSensorPosition(0);
+		// this.leftLeader.setSelectedSensorPosition(0);
 	}
 
 	public void resetOdometry(Pose2d pose) {
@@ -219,17 +214,24 @@ public class Drivetrain extends SubsystemBase {
 	// }
 
 	public void setCoastMode(){
-		this.rightLeader.setNeutralMode(NeutralMode.Coast);
-		this.leftLeader.setNeutralMode(NeutralMode.Coast);
-		this.rightFollower.setNeutralMode(NeutralMode.Coast);
-		this.leftFollower.setNeutralMode(NeutralMode.Coast);
+		leftConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+		rightConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+
+		// this.rightLeader.setNeutralMode(NeutralMode.Coast);
+		// this.leftLeader.setNeutralMode(NeutralMode.Coast);
+		// this.rightFollower.setNeutralMode(NeutralMode.Coast);
+		// this.leftFollower.setNeutralMode(NeutralMode.Coast);
 	}
 
 	public void setBrakeMode(){
-		this.rightLeader.setNeutralMode(NeutralMode.Brake);
-		this.leftLeader.setNeutralMode(NeutralMode.Brake);
-		this.rightFollower.setNeutralMode(NeutralMode.Brake);
-		this.leftFollower.setNeutralMode(NeutralMode.Brake);
+
+		leftConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+		rightConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+		// this.rightLeader.setNeutralMode(NeutralMode.Brake);
+		// this.leftLeader.setNeutralMode(NeutralMode.Brake);
+		// this.rightFollower.setNeutralMode(NeutralMode.Brake);
+		// this.leftFollower.setNeutralMode(NeutralMode.Brake);
 	}
 
 	// -----------------------------------------------------------
@@ -253,11 +255,11 @@ public class Drivetrain extends SubsystemBase {
 	}
 
 	public double getLeftDistanceMeters() {
-		return this.encoderTicksToMeters(this.rightLeader.getSelectedSensorPosition());
+		return this.encoderTicksToMeters(this.leftLeader.getPosition().getValue());	
 	}
 
 	public double getRightDistanceMeters() {
-		return this.encoderTicksToMeters(this.leftLeader.getSelectedSensorPosition());
+		return this.encoderTicksToMeters(this.rightLeader.getPosition().getValue());
 	}
 
 	public double getAvgDistanceMeters() {
@@ -462,7 +464,7 @@ public class Drivetrain extends SubsystemBase {
 
 		// SmartDashboard.putString("Neutral Mode", neutralMode.name());
 
-		// for(WPI_TalonFX fx : new WPI_TalonFX[] { this.leftLeader, this.leftFollower, this.rightLeader, this.rightFollower }) {
+		// for(TalonFX fx : new TalonFX[] { this.leftLeader, this.leftFollower, this.rightLeader, this.rightFollower }) {
 		// 	fx.setNeutralMode(neutralMode);
 		// }
 
