@@ -1,8 +1,15 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.*;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-import com.ctre.phoenix.sensors.WPI_CANCoder;
+// import com.ctre.phoenix.motorcontrol.*;
+// import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+// import com.ctre.phoenix.sensors.WPI_CANCoder;
+
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -13,8 +20,8 @@ import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.CANBusIDs;
 
 public class Arm extends SubsystemBase {
-	public final WPI_TalonFX motorLead = new WPI_TalonFX(Constants.CANBusIDs.ArmTalonLeader);
-	public final WPI_TalonFX motorFollower = new WPI_TalonFX(Constants.CANBusIDs.ArmTalonFollower);
+	public final TalonFX motorLead = new TalonFX(Constants.CANBusIDs.ArmTalonLeader);
+	public final TalonFX motorFollower = new TalonFX(Constants.CANBusIDs.ArmTalonFollower);
 
 	public final WPI_CANCoder encoder = new WPI_CANCoder(Constants.CANBusIDs.ArmEncoder);
 
@@ -23,7 +30,7 @@ public class Arm extends SubsystemBase {
 	private final Solenoid lockingPiston = new Solenoid(PneumaticsModuleType.REVPH, Constants.PneumaticIDs.armLock);
 
 	public Arm() {
-		for(final WPI_TalonFX fx : new WPI_TalonFX[] { this.motorLead, this.motorFollower}) {
+		for(final TalonFX fx : new TalonFX[] { this.motorLead, this.motorFollower}) {
 			// Reset settings for safety
 			fx.configFactoryDefault();
 
