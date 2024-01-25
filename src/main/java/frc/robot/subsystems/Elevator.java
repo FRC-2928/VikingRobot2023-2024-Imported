@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
+import com.ctre.phoenix6.configs.HardwareLimitSwitchConfigs;
 // import com.ctre.phoenix.motorcontrol.*;
 // import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -11,6 +12,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.ReverseLimitSourceValue;
 import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.signals.ReverseLimitValue;
 import com.ctre.phoenix6.signals.ForwardLimitSourceValue;
@@ -50,19 +52,26 @@ public class Elevator extends SubsystemBase {
 		}
 
 		// Home limit switch. Stop motor if this switch is triggered.
-		this.motor.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
-		
+		// OLD this.motor.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
+		var limitConfigs = new HardwareLimitSwitchConfigs();
+		limitConfigs.ForwardLimitSource = ForwardLimitSourceValue.LimitSwitchPin;
+		limitConfigs.ReverseLimitSource = ReverseLimitSourceValue.LimitSwitchPin;
 
 		// Top limit switch. Read as a digital input
-		this.motor.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
+		// OLD this.motor.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
 
-		this.motor.configForwardSoftLimitThreshold(ElevatorConstants.bottomSoftLimit);
-		this.motor.configReverseSoftLimitThreshold(ElevatorConstants.topSoftLimit);
+		// ????? TODO this.motor.configForwardSoftLimitThreshold(ElevatorConstants.bottomSoftLimit);
+		// ???? this.motor.configReverseSoftLimitThreshold(ElevatorConstants.topSoftLimit);
 
-		this.motor.configForwardSoftLimitEnable(true);
-		this.motor.configReverseSoftLimitEnable(true);
+		// old this.motor.configForwardSoftLimitEnable(true);
+		// old this.motor.configReverseSoftLimitEnable(true);
+		limitConfigs.ForwardLimitEnable = true;
+		limitConfigs.ReverseLimitEnable = true;
 
-		this.motor.overrideSoftLimitsEnable(true);
+		// ???? TODO this.motor.overrideSoftLimitsEnable(true);
+
+		// NEW
+		this.motor.getConfigurator().apply(limitConfigs);
 
 		Telemetry.track("Elevator Position", this::getPosition, false);
 		Telemetry.track("Elevator Home Limit", () -> this.limitHomeClosed(), false);
