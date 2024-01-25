@@ -10,6 +10,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.hardware.CANcoder;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -23,7 +24,7 @@ public class Arm extends SubsystemBase {
 	public final TalonFX motorLead = new TalonFX(Constants.CANBusIDs.ArmTalonLeader);
 	public final TalonFX motorFollower = new TalonFX(Constants.CANBusIDs.ArmTalonFollower);
 
-	public final WPI_CANCoder encoder = new WPI_CANCoder(Constants.CANBusIDs.ArmEncoder);
+	public final CANcoder encoder = new CANcoder(Constants.CANBusIDs.ArmEncoder);
 
 	// True: Unlocked
 	// False: Locked

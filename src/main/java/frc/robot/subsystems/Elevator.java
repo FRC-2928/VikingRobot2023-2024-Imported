@@ -1,5 +1,8 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
+import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 // import com.ctre.phoenix.motorcontrol.*;
 // import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -8,6 +11,10 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.controls.*;
+import com.ctre.phoenix6.signals.ReverseLimitValue;
+import com.ctre.phoenix6.signals.ForwardLimitSourceValue;
+import com.ctre.phoenix6.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;

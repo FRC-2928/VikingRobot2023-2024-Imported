@@ -188,14 +188,17 @@ public class Drivetrain extends SubsystemBase {
 		double leftVelocityTicksPerSec = metersToEncoderTicks(leftMetersPerSecond);
 		double rightVelocityTicksPerSec = metersToEncoderTicks(rightMetersPerSecond);
 
-		this.rightLeader.set(ControlMode.Velocity,
-				leftVelocityTicksPerSec / 10.0,
-				DemandType.ArbitraryFeedForward,
-				leftFeedForward / AutoConstants.maxVolts);
-		this.leftLeader.set(ControlMode.Velocity,
-				rightVelocityTicksPerSec / 10.0,
-				DemandType.ArbitraryFeedForward,
-				rightFeedForward / AutoConstants.maxVolts);
+		this.rightLeader.set(0);
+		this.leftLeader.set(0);
+
+		// this.rightLeader.set(// ControlMode.Velocity,
+		// 		leftVelocityTicksPerSec / 10.0,
+		// 		DemandType.ArbitraryFeedForward,
+		// 		leftFeedForward / AutoConstants.maxVolts);
+		// this.leftLeader.set(// ControlMode.Velocity,
+		// 		rightVelocityTicksPerSec / 10.0,
+		// 		DemandType.ArbitraryFeedForward,
+		// 		rightFeedForward / AutoConstants.maxVolts);
 
 		this.diffDrive.feed();
 	}
@@ -268,7 +271,7 @@ public class Drivetrain extends SubsystemBase {
 
 	public double[] readGyro() {
 		double[] angle = new double[3];
-		this.pigeon.getYawPitchRoll(angle);
+		// this.pigeon.getYawPitchRoll(angle);
 		return angle;
 	}
 
@@ -301,15 +304,18 @@ public class Drivetrain extends SubsystemBase {
 	}
 
 	public double readYaw() {
-		return this.readGyro()[0];
+		return this.pigeon.getAngle();
+		//return this.readGyro()[0];
 	}
 
 	public double readPitch() {
-		return -this.readGyro()[1];
+	// TODO Convert status signal 	
+	return 0.0; // return -this.pigeon.getPitch();
 	}
 
 	public double readRoll() {
-		return -this.readGyro()[2];
+		// TODO Convert status signal 	
+	return 0.0; // return -this.pigeon.getRoll();
 	}
 
 	public Rotation2d read2dRotation() {
@@ -320,9 +326,9 @@ public class Drivetrain extends SubsystemBase {
 		return this.odometry.getPoseMeters();
 	}
 
-	public double getMotorOutput() {
-		return this.leftLeader.getMotorOutputVoltage();
-	}
+	// public double getMotorOutput() {
+	// 	return this.leftLeader.getMotorOutputVoltage();
+	// }
 
 	public double metersToWheelRotations(double metersPerSecond) {
 		return metersPerSecond / (DrivetrainConstants.wheelDiameterMeters * Math.PI);
@@ -347,7 +353,7 @@ public class Drivetrain extends SubsystemBase {
 	}
 
 	public double getHeading() {
-		return this.pigeon.getYaw();
+		return this.pigeon.getAngle();
 	}
 
 	// Robot transform in 3D field-space. Translation (X,Y,Z) Rotation(X,Y,Z)
@@ -366,11 +372,11 @@ public class Drivetrain extends SubsystemBase {
 	// using botpose_wpired and botpose_wpiblue
 	public Pose2d getLimelightPoseRelative() {
 		if(RobotBase.isReal()) {
-			if(DriverStation.getAlliance() == DriverStation.Alliance.Red) {
-				return this.limelight.getRedPose2d();
-			} else {
+			// if(DriverStation.getAlliance() == DriverStation.Alliance.Red) {
+			// 	return this.limelight.getRedPose2d();
+			// } else {
 				return this.limelight.getBluePose2d();
-			}
+			// }
 		} else {
 			// In simulation we just return the encoder pose.
 			return this.getEncoderPose();
@@ -388,11 +394,11 @@ public class Drivetrain extends SubsystemBase {
 	 * @return Is robot left or right of the center of the Charging Station
 	 */
 	public boolean isLeftOfChargingStation() {
-		if(DriverStation.getAlliance() == DriverStation.Alliance.Red) {
-			return this.getEstimatedPose().getY() >= FieldConstants.Community.chargingStationCenterY;
-		} else {
+		// if(DriverStation.getAlliance() == DriverStation.Alliance.Red) {
+		// 	return this.getEstimatedPose().getY() >= FieldConstants.Community.chargingStationCenterY;
+		// } else {
 			return this.getEstimatedPose().getY() <= FieldConstants.Community.chargingStationCenterY;
-		}
+		// }
 	}
 
 	public boolean isRightOfChargingStation() {
@@ -485,13 +491,14 @@ public class Drivetrain extends SubsystemBase {
 	@Override
 	public void simulationPeriodic() {
 		// PhysicsSim.getInstance().run();
-		this.driveSim.run();
+		// this.driveSim.run();
 	}
 
 	public boolean getHasValidTargetsSim() {
 		double heading = this.getEncoderPose().getRotation().getDegrees();
 
-		if(DriverStation.getAlliance() == DriverStation.Alliance.Red) return heading < 75 || heading > -75;
-		else return heading > 135 || heading < -135;
+		// if(DriverStation.getAlliance() == DriverStation.Alliance.Red) return heading < 75 || heading > -75;
+		// else 
+		return heading > 135 || heading < -135;
 	}
 }
