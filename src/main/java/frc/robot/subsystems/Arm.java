@@ -49,6 +49,10 @@ public class Arm extends SubsystemBase {
 			configuration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
 			configuration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+			configuration.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+
+
 			this.motorLead.getConfigurator().apply(configuration);
 			this.motorFollower.getConfigurator().apply(configuration);
 
@@ -60,19 +64,19 @@ public class Arm extends SubsystemBase {
 			// fx.configFactoryDefault();
 
 			// Sets voltage compensation to 10, used for percent output
-			fx.configVoltageCompSaturation(10);
-			fx.enableVoltageCompensation(true);
+			// SKIP fx.configVoltageCompSaturation(10);
+			// SKIP fx.enableVoltageCompensation(true);
 
 			// Setting just in case
-			fx.configNominalOutputForward(0);
-			fx.configNominalOutputReverse(0);
-			fx.configPeakOutputForward(1);
-			fx.configPeakOutputReverse(-1);
+			// SKIP fx.configNominalOutputForward(0);
+			// SKIP fx.configNominalOutputReverse(0);
+			// SKIP fx.configPeakOutputForward(1);
+			// SKIP fx.configPeakOutputReverse(-1);
 
-			fx.configOpenloopRamp(0.1);
+			// SKIP fx.configOpenloopRamp(0.1);
 
 			// Setting deadband(area required to start moving the motor) to 1%
-			fx.configNeutralDeadband(0.01);
+			// SKIP fx.configNeutralDeadband(0.01);
 
 			// Set to brake mode, will brake the motor when no power is sent
 			// DONE fx.setNeutralMode(NeutralMode.Brake);
@@ -84,23 +88,23 @@ public class Arm extends SubsystemBase {
 			 * Falcons have insane acceleration so allowing it to reach 80 for 0.03 seconds
 			 * should be fine
 			 */
-			fx.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 40, 55, 20));
+			// SKIP fx.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 40, 55, 20));
 
 			// Either using the integrated Falcon sensor or an external one, will change if
 			// needed
-			fx.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+			// DONE fx.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 
-			fx.configRemoteFeedbackFilter(CANBusIDs.ArmEncoder, RemoteSensorSource.CANCoder, 0, 0);
-			fx.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
+			// SKIP fx.configRemoteFeedbackFilter(CANBusIDs.ArmEncoder, RemoteSensorSource.CANCoder, 0, 0);
+			// TODO ?? fx.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
 		//  END OLD   }
 
 		// DONE this.motorFollower.setInverted(InvertType.FollowMaster);
 		// DONE this.motorFollower.follow(this.motorLead);
 
-		this.motorLead.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
+		// TODO this.motorLead.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
 
 		Telemetry.track("Arm Position", this::getPosition, false);
-		Telemetry.track("Arm Limit", () -> this.motorLead.getSensorCollection().isRevLimitSwitchClosed() == 1, false);
+		// TODO Telemetry.track("Arm Limit", () -> this.motorLead.getSensorCollection().isRevLimitSwitchClosed() == 1, false);
 	}
 
 	public void halt() {
@@ -118,16 +122,21 @@ public class Arm extends SubsystemBase {
 	}
 
 	public void setPower(final double power) {
-		this.motorLead.set(ControlMode.PercentOutput, MathUtil.clamp(power, -0.5, 0.5));
+		// this.motorLead.set(ControlMode.PercentOutput, MathUtil.clamp(power, -0.5, 0.5));
+		var voltsRequest = new DutyCycleOut(power / 12);
+		this.motorLead.setControl(voltsRequest);
 	}
 
 	public void lock(final boolean shouldLock) {
 		this.lockingPiston.set(!shouldLock);
-		this.motorLead.set(ControlMode.PercentOutput, 0.0); // just to be safe
+		// this.motorLead.set(ControlMode.PercentOutput, 0.0); // just to be safe
+		var voltsRequest = new DutyCycleOut(0);
+		this.motorLead.setControl(voltsRequest);
 	}
 
 	public double getPosition() {
-		return this.encoder.getAbsolutePosition();
+		return this.motorLead.getPosition().getValue();
+		// 	return this.encoder.getAbsolutePosition();
 	}
 
 	private boolean pastTopLimit() {
@@ -147,9 +156,10 @@ public class Arm extends SubsystemBase {
 	public void periodic() {
 		if(this.pastBottomLimit() || this.pastTopLimit()) this.halt();
 
-		if(this.motorLead.getSensorCollection().isRevLimitSwitchClosed() == 1) {
-            //System.out.println(this.encoder.getAbsolutePosition());
-			this.encoder.configMagnetOffset(this.encoder.configGetMagnetOffset() - (this.encoder.getAbsolutePosition() - ArmConstants.armLimitSwitchOffset));
-		}
+		// TODO if(this.motorLead.getSensorCollection().isRevLimitSwitchClosed() == 1) {
+        //     //System.out.println(this.encoder.getAbsolutePosition());
+		// 	this.encoder.configMagnetOffset(this.encoder.configGetMagnetOffset() - 
+		// 	(this.encoder.getAbsolutePosition() - ArmConstants.armLimitSwitchOffset) );
+		// }
 	}
 }
