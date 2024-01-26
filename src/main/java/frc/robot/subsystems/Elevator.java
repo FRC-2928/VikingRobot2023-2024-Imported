@@ -96,30 +96,37 @@ public class Elevator extends SubsystemBase {
 	}
 
 	public void setPower(double power) {
-		this.motor.set(ControlMode.PercentOutput, MathUtil.clamp(power, -0.2, 0.2));
+		// this.motor.set(ControlMode.PercentOutput, MathUtil.clamp(power, -0.2, 0.2));
+		var leftVoltsRequest = new DutyCycleOut(power / 12);
+		this.motor.setControl(leftVoltsRequest);
 	}
 
 	public void lock(boolean shouldLock) {
 		this.lockingPiston.set(!shouldLock);
-		this.motor.set(ControlMode.PercentOutput, 0.0); // just to be safe
+		// this.motor.set(ControlMode.PercentOutput, 0.0); // just to be safe
+		var leftVoltsRequest = new DutyCycleOut(0);
+		this.motor.setControl(leftVoltsRequest);
 	}
 
 	// ------------- System State -------------------
 
 	public boolean limitTopClosed() {
-		return this.motor.getSensorCollection().isRevLimitSwitchClosed() == 1;
+		// TODO return this.motor.getSensorCollection().isRevLimitSwitchClosed() == 1;
+		return true; //TEMP
 	}
 
 	public boolean limitHomeClosed() {
-		return this.motor.getSensorCollection().isFwdLimitSwitchClosed() == 1;
-	}
+		// TODO return this.motor.getSensorCollection().isFwdLimitSwitchClosed() == 1;
+			return true; //TEMP
+}
 
 	public double getPosition() {
-		return this.motor.getSelectedSensorPosition();
-	}
+		// TODO return this.motor.getSelectedSensorPosition();
+			return 0; //TEMP
+}
 
 	public void overrideEncoderPosition(double ticks) {
-		this.motor.setSelectedSensorPosition(ticks);
+		// TODO this.motor.setSelectedSensorPosition(ticks);
 	}
 
 	private boolean pastTopLimit() {

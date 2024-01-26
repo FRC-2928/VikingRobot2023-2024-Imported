@@ -1,11 +1,21 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.InvertType;
+import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
+import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.RemoteSensorSource;
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
+
 // import com.ctre.phoenix.motorcontrol.*;
 // import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 // import com.ctre.phoenix.sensors.WPI_CANCoder;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -32,8 +42,22 @@ public class Arm extends SubsystemBase {
 
 	public Arm() {
 		for(final TalonFX fx : new TalonFX[] { this.motorLead, this.motorFollower}) {
+      		fx.getConfigurator().apply(new TalonFXConfiguration());     
+		}
+			//NEW
+			var configuration = new TalonFXConfiguration();
+			configuration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+			configuration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+			this.motorLead.getConfigurator().apply(configuration);
+			this.motorFollower.getConfigurator().apply(configuration);
+
+			this.motorFollower.setControl(new Follower(motorLead.getDeviceID(), false));
+			// end NEW  
+
+			//OLD
 			// Reset settings for safety
-			fx.configFactoryDefault();
+			// fx.configFactoryDefault();
 
 			// Sets voltage compensation to 10, used for percent output
 			fx.configVoltageCompSaturation(10);
@@ -51,7 +75,7 @@ public class Arm extends SubsystemBase {
 			fx.configNeutralDeadband(0.01);
 
 			// Set to brake mode, will brake the motor when no power is sent
-			fx.setNeutralMode(NeutralMode.Brake);
+			// DONE fx.setNeutralMode(NeutralMode.Brake);
 
 			/**
 			 * Setting input side current limit (amps)
@@ -68,10 +92,10 @@ public class Arm extends SubsystemBase {
 
 			fx.configRemoteFeedbackFilter(CANBusIDs.ArmEncoder, RemoteSensorSource.CANCoder, 0, 0);
 			fx.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
-		}
+		//  END OLD   }
 
-		this.motorFollower.setInverted(InvertType.FollowMaster);
-		this.motorFollower.follow(this.motorLead);
+		// DONE this.motorFollower.setInverted(InvertType.FollowMaster);
+		// DONE this.motorFollower.follow(this.motorLead);
 
 		this.motorLead.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
 
