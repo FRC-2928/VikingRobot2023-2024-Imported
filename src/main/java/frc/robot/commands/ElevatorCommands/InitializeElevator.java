@@ -1,5 +1,7 @@
 package frc.robot.commands.ElevatorCommands;
 
+import com.ctre.phoenix6.configs.HardwareLimitSwitchConfigs;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.subsystems.Elevator;
@@ -15,8 +17,15 @@ public class InitializeElevator extends Command {
 
 	@Override
 	public void initialize() {
-		this.elevator.motor.overrideLimitSwitchesEnable(true);
-		this.elevator.motor.overrideSoftLimitsEnable(false);
+		//this.elevator.motor.overrideLimitSwitchesEnable(true);
+		//this.elevator.motor.overrideSoftLimitsEnable(false);
+
+		var limitConfigs = new HardwareLimitSwitchConfigs();
+
+		limitConfigs.ForwardLimitEnable = true; //?????
+		limitConfigs.ReverseLimitEnable = true;
+
+		this.elevator.motor.getConfigurator().apply(limitConfigs);
 	}
 
 	@Override
@@ -26,8 +35,15 @@ public class InitializeElevator extends Command {
 
 	@Override
 	public void end(boolean interrupted) {
-		this.elevator.motor.overrideLimitSwitchesEnable(true);
-		this.elevator.motor.overrideSoftLimitsEnable(true);
+		// this.elevator.motor.overrideLimitSwitchesEnable(true);
+		// this.elevator.motor.overrideSoftLimitsEnable(true);
+
+		var limitConfigs = new HardwareLimitSwitchConfigs();
+
+		limitConfigs.ForwardLimitEnable = true; //?????
+		limitConfigs.ReverseLimitEnable = true;
+
+		this.elevator.motor.getConfigurator().apply(limitConfigs);
 	}
 
 	@Override

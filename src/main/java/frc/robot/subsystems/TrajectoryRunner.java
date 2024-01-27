@@ -78,16 +78,16 @@ public class TrajectoryRunner {
 			// Now get the pose
 			Pose2d tag = FieldConstants.aprilTags.get(aprilTagID).toPose2d();
 
-			if ((DriverStation.getAlliance() == DriverStation.Alliance.Red)){
+	//		if ((DriverStation.getAlliance() == DriverStation.Alliance.Red)){
 				if(direction == Direction.Left) endPose = tag.plus(FieldConstants.leftRedOffset);
 				else if(direction == Direction.Right) endPose = tag.plus(FieldConstants.rightRedOffset);
 				else if(direction == Direction.Center) endPose = tag.plus(FieldConstants.centerRedOffset);
 
-			} else {
-				if(direction == Direction.Left) endPose = tag.plus(FieldConstants.leftBlueOffset);
-				else if(direction == Direction.Right) endPose = tag.plus(FieldConstants.rightBlueOffset);
-				else if(direction == Direction.Center) endPose = tag.plus(FieldConstants.centerBlueOffset);
-			}
+			// } else {
+			// 	if(direction == Direction.Left) endPose = tag.plus(FieldConstants.leftBlueOffset);
+			// 	else if(direction == Direction.Right) endPose = tag.plus(FieldConstants.rightBlueOffset);
+			// 	else if(direction == Direction.Center) endPose = tag.plus(FieldConstants.centerBlueOffset);
+			// }
 
 			Log.writeln("start", startPose, "\nend", tag);
 		}
