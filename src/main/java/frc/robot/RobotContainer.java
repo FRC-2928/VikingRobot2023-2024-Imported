@@ -86,39 +86,39 @@ public class RobotContainer {
 
 		// this.driverOI.getSetBrakeButton().onTrue(new InstantCommand(this.drivetrain::setBrakeMode, this.drivetrain));
 		// this.driverOI.getSetCoastButton().onTrue(new InstantCommand(this.drivetrain::setCoastMode, this.drivetrain));
-		this.driverOI.getBalanceButton().onTrue(new InstantCommand(this.drivetrain::setBrakeMode, this.drivetrain));
 
-		this.driverOI.getBalanceButton().whileTrue(Balance.manual(this.drivetrain));
+		// OFF for now  this.driverOI.getBalanceButton().onTrue(new InstantCommand(this.drivetrain::setBrakeMode, this.drivetrain));
+		// OFF for now  this.driverOI.getBalanceButton().whileTrue(Balance.manual(this.drivetrain));
 
-		this.driverOI.getCenterOnPoleButton().onTrue(new TurnToPole(this.drivetrain));
+		// OFF for now  this.driverOI.getCenterOnPoleButton().onTrue(new TurnToPole(this.drivetrain));
 
-		this.driverOI.getApproachTagButton().toggleOnTrue(new POVSelector(
-			this.driverOI,
-			null,
-			(dir, __) -> {
-				CommandScheduler
-					.getInstance()
-					.schedule(TrajectoryRunner.generateRamseteCommand(this.drivetrain, () -> TrajectoryRunner.generateLocalTrajectory(this.drivetrain, (TrajectoryRunner.Direction)dir)));
-			},
-			new POVSelector.Tree(
-				"Select tag offset",
-				new POVSelector.Tree("Center", TrajectoryRunner.Direction.Center),
-				new POVSelector.Tree("Left", TrajectoryRunner.Direction.Left),
-				new POVSelector.Tree(),
-				new POVSelector.Tree("Right", TrajectoryRunner.Direction.Right)
-			)
-		));
+		// OFF for now  this.driverOI.getApproachTagButton().toggleOnTrue(new POVSelector(
+		// 	this.driverOI,
+		// 	null,
+		// 	(dir, __) -> {
+		// 		CommandScheduler
+		// 			.getInstance()
+		// 			.schedule(TrajectoryRunner.generateRamseteCommand(this.drivetrain, () -> TrajectoryRunner.generateLocalTrajectory(this.drivetrain, (TrajectoryRunner.Direction)dir)));
+		// 	},
+		// 	new POVSelector.Tree(
+		// 		"Select tag offset",
+		// 		new POVSelector.Tree("Center", TrajectoryRunner.Direction.Center),
+		// 		new POVSelector.Tree("Left", TrajectoryRunner.Direction.Left),
+		// 		new POVSelector.Tree(),
+		// 		new POVSelector.Tree("Right", TrajectoryRunner.Direction.Right)
+		// 	)
+		// ));
 
-		this.driverOI.getRunIntakeButton().whileTrue(new RunIntake(this.intake, IntakeConstants.intakePower));
+		// OFF for now  	this.driverOI.getRunIntakeButton().whileTrue(new RunIntake(this.intake, IntakeConstants.intakePower));
 
-		this.driverOI.getHaltButton().onTrue(new InstantCommand(() -> {
-			CommandScheduler.getInstance().cancelAll();
-			Log.warning("[HALT - DRIVER]");
-			this.drivetrain.halt();
-			this.elevator.halt();
-			this.arm.halt();
-			this.intake.setOutput(0);
-		}));
+		// OFF for now  this.driverOI.getHaltButton().onTrue(new InstantCommand(() -> {
+		// 	CommandScheduler.getInstance().cancelAll();
+		// 	Log.warning("[HALT - DRIVER]");
+		// 	this.drivetrain.halt();
+		// 	this.elevator.halt();
+		// 	this.arm.halt();
+		// 	this.intake.setOutput(0);
+		// }));
 	}
 
 	private void configureOperatorControls() {
